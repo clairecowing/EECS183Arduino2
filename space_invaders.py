@@ -212,12 +212,11 @@ class Cannonball:
         if self.y >= 0:
             self.y -= 1
         else:
-            pass
-        # what should we do when it goes off screen?
+            self.reset()
         
 
     # resets private data members to initial values
-    # why do we have this as a separate function to reset()
+    '''why do we have this as a separate function to reset()--------------------------------''' 
     def hit(self) -> None:
         self.x = 0
         self.y = 0
@@ -277,7 +276,7 @@ class Player:
     def reset(self, x_arg: int, y_arg: int, lives_arg: int) -> None:
         self.x = x_arg
         self.y = y_arg
-        # are we resetting the lives?
+        ''' are we resetting the lives? ---------------------------------------- '''
         self.lives = lives_arg
 
     # draws the player
@@ -294,6 +293,7 @@ class Game:
     def __init__(self) -> None:
         self.level: int = 1
         self.time: float = time.monotonic()
+        self.move_time = time.monotonic()
         # suggested: you will want to add more attributes here
         # suggested - float for time for cannonball and invaders to move
         self.last_move: int = 0
@@ -309,25 +309,53 @@ class Game:
     # main loop (called repeatedly)
     def update(self, potentiometer_value: int, button_pressed: bool) -> None:
         # TODO
+        
         matrix[4,7] = RED
         invader1 = Invader(4, 5, 1)
         invader2 = Invader(8, 5, 6)
         invader1.draw()
         invader2.draw()
         display.refresh()
+        print(potentiometer_value)
+
         # suggested steps (check the Game Dynamics section of the specification for more)
         # 1. get the current time - this is a float in seconds
         # since the unit was powered on
+        self.time = time.monotonic()
 
         # 2. check for collision with player
+        if self.check_invader_collision():
+            player.die()
+            if player.get_lives() == 0:
+                self.reset_level()
 
         # 3. update the player if potentiometer moved significantly
+        # normalize
+        player.setx(potentiometer_value // 1187)
 
         # 4. detect if should fire
+        if button_pressed: 
+            cannonball.fire(player.x + 1, player.y - 1)
 
         # 5. move cannonball if fired
+        if self.time > cannonball.time + 0.1:
+            cannonball.move()
 
         # 6. move invaders
+        if self.time > invader.time + 0.5:
+            '''
+            check to make sure invader is within the screen 
+            and that its not touching player
+            '''
+            # if 
+
+            # erase each invader
+            for invader in self.enemies:
+                invader.erase()
+            # move each invader down by 1 
+                invader.move()
+            # draw each invader
+                invader.draw()
 
         # 7. check for cleared level
 
